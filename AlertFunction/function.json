@@ -5,8 +5,8 @@
       "name": "myTimer",
       "type": "timerTrigger",
       "direction": "in",
-      "schedule": "0 0 3 * * SUN",
-      "runOnStartup": true
+      "schedule": "0 0 0 * * *",
+      "runOnStartup": false
     }
   ]
 }
