@@ -81,7 +81,7 @@ def prediction_restaurant_count():
         with conn.cursor() as cursor:
             pred_execution = '''
             select distinct(restaurant) from public."Predictions_predictions" 
-            where  date(created_at) = CURRENT_DATE
+            where date(created_at) = CURRENT_DATE
             '''
             cursor.execute(pred_execution)
             rows = cursor.fetchall()

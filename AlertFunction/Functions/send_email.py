@@ -12,16 +12,16 @@ EMAIL_ADDRESS = os.getenv('EMAIL_ADDRESS')
 EMAIL_PASSWORD = os.getenv('EMAIL_PASSWORD')
 SMTP_SERVER = os.getenv('SMTP_SERVER')
 SMTP_PORT = os.getenv('SMTP_PORT')
-RECIPIENT_EMAIL = os.getenv('RECIPIENT_EMAIL')
+RECIPIENT_EMAILS = os.getenv('RECIPIENT_EMAILS').split(',')
 
 
-def send_email(subject, body, to_email):
+def send_email(subject, body, to_emails):
     from_email = EMAIL_ADDRESS
     password = EMAIL_PASSWORD
 
     msg = MIMEMultipart()
     msg['From'] = from_email
-    msg['To'] = to_email
+    msg['To'] = ', '.join(to_emails)
     msg['Subject'] = subject
 
     msg.attach(MIMEText(body, 'html'))
@@ -31,7 +31,7 @@ def send_email(subject, body, to_email):
         server.starttls()
         server.login(from_email, password)
         text = msg.as_string()
-        server.sendmail(from_email, to_email, text)
+        server.sendmail(from_email, to_emails, text)
         server.quit()
         logging.info("Email sent successfully")
     except Exception as e:
