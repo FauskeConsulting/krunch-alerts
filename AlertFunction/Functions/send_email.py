@@ -33,6 +33,6 @@ def send_email(subject, body, to_emails):
         text = msg.as_string()
         server.sendmail(from_email, to_emails, text)
         server.quit()
-        logging.info("Email sent successfully")
+        logging.info(f"Email sent to {RECIPIENT_EMAILS} successfully")
     except Exception as e:
         logging.error(f"Failed to send email: {e}")

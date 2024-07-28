@@ -21,6 +21,7 @@ def main(myTimer: func.TimerRequest) -> None:
     difference_predictions = prediction_difference()
     deviation = deviation_in_prediction()
 
+
     # deviation.to_csv('deviation.csv')
     # if len(differences_opening_hours) :
     #     differences_opening_hours.to_csv("new_opening_hours.csv")
@@ -31,7 +32,7 @@ def main(myTimer: func.TimerRequest) -> None:
     prediction_restaurant_count_html = pred_rest_count.to_html()
     deviation_html = deviation.to_html()
     differences_opening_hours_html = differences_opening_hours.to_html() if len(differences_opening_hours) >0 else "There are currently no changes in opening hours"
-    difference_predictions_html = difference_predictions.to_html() if len(difference_predictions) > 0 else ""
+    difference_predictions_html = difference_predictions.to_html() if len(difference_predictions) > 0 else "There are currently no unusual predictions that deviate more than 50% since the last prediction"
 
 
     # Create email content
