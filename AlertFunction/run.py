@@ -38,17 +38,18 @@ def main(myTimer: func.TimerRequest) -> None:
     # Create email content
     email_subject = "Restaurant Data Updates"
     email_body = f"""
-    <h3>Today, predictions were successfull on following restaurants</h3>
-    {prediction_restaurant_count_html}
+    <h3>New Opening Hours</h3>
+    {differences_opening_hours_html}
     <br><br>
     <h3>Unusual Predictions</h3>
     {difference_predictions_html}
     <br><br>
+    <h3>Today, predictions were successfull on following restaurants</h3>
+    {prediction_restaurant_count_html}
+    <br><br>
     <h3>Deviation in Prediction</h3>
     {deviation_html}
     <br><br>
-    <h3>New Opening Hours</h3>
-    {differences_opening_hours_html}
     """
 
     # Send the email
