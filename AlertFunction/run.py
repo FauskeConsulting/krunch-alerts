@@ -9,7 +9,7 @@ from AlertFunction.Functions.send_email import send_email
 from dotenv import load_dotenv
 import os
 
-RECIPIENT_EMAIL = os.getenv('RECIPIENT_EMAILS').split(',')
+RECIPIENT_EMAIL = os.environ.get('RECIPIENT_EMAILS').split(',')
 
 def main(myTimer: func.TimerRequest) -> None:
     if myTimer.past_due:

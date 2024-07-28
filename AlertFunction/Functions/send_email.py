@@ -8,12 +8,11 @@ import os
 # Load environment variables from .env file
 load_dotenv()
 
-EMAIL_ADDRESS = os.getenv('EMAIL_ADDRESS')
-EMAIL_PASSWORD = os.getenv('EMAIL_PASSWORD')
-SMTP_SERVER = os.getenv('SMTP_SERVER')
-SMTP_PORT = os.getenv('SMTP_PORT')
-RECIPIENT_EMAILS = os.getenv('RECIPIENT_EMAILS').split(',')
-
+EMAIL_ADDRESS = os.environ.get('EMAIL_ADDRESS',None)
+EMAIL_PASSWORD = os.environ.get('EMAIL_PASSWORD')
+SMTP_SERVER = os.environ.get('SMTP_SERVER')
+SMTP_PORT = os.environ.get('SMTP_PORT')
+RECIPIENT_EMAILS = os.environ.get('RECIPIENT_EMAILS').split(',')
 
 def send_email(subject, body, to_emails):
     from_email = EMAIL_ADDRESS
