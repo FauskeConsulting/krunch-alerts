@@ -4,6 +4,7 @@ from AlertFunction.params import prod_params,local_params
 from AlertFunction.constant import restaurants
 import pandas as pd
 from AlertFunction.Functions.prediction_deviation import deviation_in_prediction
+from AlertFunction.Functions.salesvpred import sales_vs_pred
 from AlertFunction.Functions.opening_hours import opening_hours_diff,prediction_difference,prediction_restaurant_count
 from AlertFunction.Functions.send_email import send_email
 from dotenv import load_dotenv
@@ -20,6 +21,8 @@ def main(myTimer: func.TimerRequest) -> None:
     differences_opening_hours = opening_hours_diff()
     difference_predictions = prediction_difference()
     deviation = deviation_in_prediction()
+    sales_pred = sales_vs_pred()
+    # sales_pred.to_csv('sales_vs_pred.csv')
 
 
     # deviation.to_csv('deviation.csv')
@@ -33,6 +36,7 @@ def main(myTimer: func.TimerRequest) -> None:
     deviation_html = deviation.to_html()
     differences_opening_hours_html = differences_opening_hours.to_html() if len(differences_opening_hours) >0 else "There are currently no changes in opening hours"
     difference_predictions_html = difference_predictions.to_html() if len(difference_predictions) > 0 else "There are currently no unusual predictions that deviate more than 50% since the last prediction"
+    sales_pred_html = sales_pred.to_html()
 
 
     # Create email content
@@ -43,6 +47,9 @@ def main(myTimer: func.TimerRequest) -> None:
     <br><br>
     <h3>Unusual Predictions</h3>
     {difference_predictions_html}
+    <br><br>
+    <h3>Unusual Predictions</h3>
+    {sales_pred_html}
     <br><br>
     <h3>Today, predictions were successfull on following restaurants</h3>
     {prediction_restaurant_count_html}
