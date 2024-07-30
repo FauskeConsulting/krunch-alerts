@@ -45,7 +45,7 @@ def main(myTimer: func.TimerRequest) -> None:
     <h3>New Opening Hours</h3>
     {differences_opening_hours_html}
     <br><br>
-    <h3>Unusual Predictions</h3>
+    <h3>Actual Sales vs Prediction</h3>
     {difference_predictions_html}
     <br><br>
     <h3>Unusual Predictions</h3>
