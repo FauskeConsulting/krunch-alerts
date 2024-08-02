@@ -80,12 +80,20 @@ def prediction_restaurant_count():
     with psycopg2.connect(**prod_params) as conn:
         with conn.cursor() as cursor:
             pred_execution = '''
-            select distinct(restaurant) from public."Predictions_predictions" 
-            where date(created_at) = CURRENT_DATE
+            WITH MaxDates AS (
+                SELECT restaurant, MAX(created_at) AS max_created_at
+                FROM public."Predictions_predictions"
+                where restaurant not in ('Krunch Oslo','Krunch Stavanger')
+                GROUP BY restaurant
+            )
+            SELECT DISTINCT pp.restaurant, date(pp.created_at) 
+            FROM public."Predictions_predictions" pp
+            JOIN MaxDates md ON pp.restaurant = md.restaurant AND pp.created_at = md.max_created_at
+            order by date desc
             '''
             cursor.execute(pred_execution)
             rows = cursor.fetchall()
-            temp_df = pd.DataFrame(rows, columns=['restaurant'])
+            temp_df = pd.DataFrame(rows, columns=['restaurant','Prediction date'])
             temp_df.insert(0, 's.n', range(1, len(temp_df) + 1))
     conn.close()
     return temp_df

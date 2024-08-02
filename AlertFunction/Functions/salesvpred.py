@@ -8,7 +8,13 @@ def sales_vs_pred():
         with conn.cursor() as cursor:
             all_data = pd.DataFrame()
             for restaurant in restaurants:
-                sales_vs_pred_query = '''
+                if restaurant in ['Restaurant','Fisketorget Utsalg']:
+                    from_date = 9
+                    to_date = 2
+                else:
+                    from_date = 8
+                    to_date = 1
+                sales_vs_pred_query = f'''
                 WITH LatestEntries AS (
                         SELECT
                             date,
@@ -17,8 +23,8 @@ def sales_vs_pred():
                         FROM
                             public."Predictions_predictions"
                         WHERE
-                            date > date(CURRENT_DATE - INTERVAL '8 days')
-                            and date <= date(CURRENT_DATE - INTERVAL '1 days')
+                            date > date(CURRENT_DATE - INTERVAL '{from_date} days')
+                            and date <= date(CURRENT_DATE - INTERVAL '{to_date} days')
                         GROUP BY
                             date, restaurant
                     ),
@@ -41,13 +47,13 @@ def sales_vs_pred():
                         FROM 
                             public."SalesData"
                         WHERE
-                            gastronomic_day > date(CURRENT_DATE - INTERVAL '8 days')
-                            and gastronomic_day <= date(CURRENT_DATE - INTERVAL '1 days')
+                            gastronomic_day > date(CURRENT_DATE - INTERVAL '{from_date} days')
+                            and gastronomic_day <= date(CURRENT_DATE - INTERVAL '{to_date} days')
                             and restaurant = %s
                         GROUP BY restaurant
                     )
 
-                    SELECT date(CURRENT_DATE - INTERVAL '7 days') as to, date(CURRENT_DATE - INTERVAL '1 days') as from_date, Ac.restaurant,Ac.actual_sales,Ap.actual_pred
+                    SELECT date(CURRENT_DATE - INTERVAL '{from_date} days') as to, date(CURRENT_DATE - INTERVAL '{to_date} days') as from_date, Ac.restaurant,Ac.actual_sales,Ap.actual_pred
                         FROM actual_sales Ac  join actual_prediction Ap on Ac.restaurant = Ap.restaurant
 
                 '''
@@ -55,6 +61,8 @@ def sales_vs_pred():
                 rows = cursor.fetchall()
                 temp_df = pd.DataFrame(rows, columns=['from', 'to', 'restaurant', 'Sum of Sales', 'Sum of Prediction'])
                 temp_df['Percentage_change'] = ((temp_df['Sum of Sales'] - temp_df['Sum of Prediction'])/temp_df['Sum of Sales'])*100
+                temp_df['Percentage_change'] = temp_df['Percentage_change'].astype(float)
+                temp_df['Percentage_change'] = round(temp_df['Percentage_change'],2)
                 # temp_df['date']= temp_df['date'].fillna(restaurant)
                 all_data= pd.concat([all_data,temp_df],ignore_index= True)
                 # filtered_df = all_data[all_data['date'].isna() & all_data['restaurant'].notna()][['restaurant', 'pred_trend']]

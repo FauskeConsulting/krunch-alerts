@@ -22,14 +22,7 @@ def main(myTimer: func.TimerRequest) -> None:
     difference_predictions = prediction_difference()
     deviation = deviation_in_prediction()
     sales_pred = sales_vs_pred()
-    # sales_pred.to_csv('sales_vs_pred.csv')
 
-
-    # deviation.to_csv('deviation.csv')
-    # if len(differences_opening_hours) :
-    #     differences_opening_hours.to_csv("new_opening_hours.csv")
-    # if len(difference_predictions) > 0:
-    #     difference_predictions.to_csv("unusual_pred.csv")
 
     # Convert DataFrames to HTML
     prediction_restaurant_count_html = pred_rest_count.to_html()
@@ -38,23 +31,26 @@ def main(myTimer: func.TimerRequest) -> None:
     difference_predictions_html = difference_predictions.to_html() if len(difference_predictions) > 0 else "There are currently no unusual predictions that deviate more than 50% since the last prediction"
     sales_pred_html = sales_pred.to_html()
 
-
     # Create email content
     email_subject = "Restaurant Data Updates"
     email_body = f"""
     <h3>New Opening Hours</h3>
     {differences_opening_hours_html}
     <br><br>
-    <h3>Actual Sales vs Prediction</h3>
+    <h3>Unusual Predictions</h3>
     {difference_predictions_html}
     <br><br>
-    <h3>Unusual Predictions</h3>
+    <h3>Actual Sales vs Prediction</h3>
     {sales_pred_html}
     <br><br>
-    <h3>Today, predictions were successfull on following restaurants</h3>
+    <h3>Prediction Status</h3>
+    <p>The table shows when the prediction ran for which restaurant</p>
     {prediction_restaurant_count_html}
     <br><br>
-    <h3>Deviation in Prediction</h3>
+    <h3>trend in Prediction for the next two weeks</h3>
+    <p>This table shows the next two weeks of predictions where <strong>first_total_gross </strong> is the prediction amount of the first prediction run </p>
+    <br>
+    <p> whereas <strong>last_total_gross </strong> is the prediction amount of the latest prediction run which might have changed because of updated sales and weather data </p>
     {deviation_html}
     <br><br>
     """
