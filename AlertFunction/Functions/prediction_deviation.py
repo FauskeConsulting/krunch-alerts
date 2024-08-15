@@ -86,7 +86,8 @@ def deviation_in_prediction():
                 temp_df = pd.DataFrame(rows, columns=['date', 'restaurant', 'first_total_gross', 'last_total_gross', 'overall_percentage_change'])
                 # temp_df['date']= temp_df['date'].fillna(restaurant)
                 all_data= pd.concat([all_data,temp_df],ignore_index= True)
-                # filtered_df = all_data[all_data['date'].isna() & all_data['restaurant'].notna()][['restaurant', 'pred_trend']]
-
+             # filtered_df = all_data[all_data['date'].isna() & all_data['restaurant'].notna()][['restaurant', 'pred_trend']]
+    all_data.reset_index(drop=True, inplace=True)
+    all_data.insert(0,'s.n', range(1, len(all_data) + 1))
     conn.close()
     return all_data

@@ -74,12 +74,14 @@ def sales_vs_pred():
                 cursor.execute(sales_vs_pred_query)
                 rows = cursor.fetchall()
                 temp_df = pd.DataFrame(rows, columns=['from', 'to', 'restaurant', 'Sum of Sales', 'Sum of Prediction'])
+
                 temp_df['Percentage_change'] = ((temp_df['Sum of Sales'] - temp_df['Sum of Prediction'])/temp_df['Sum of Sales'])*100
                 temp_df['Percentage_change'] = temp_df['Percentage_change'].astype(float)
                 temp_df['Percentage_change'] = round(temp_df['Percentage_change'],2)
                 # temp_df['date']= temp_df['date'].fillna(restaurant)
                 all_data= pd.concat([all_data,temp_df],ignore_index= True)
                 # filtered_df = all_data[all_data['date'].isna() & all_data['restaurant'].notna()][['restaurant', 'pred_trend']]
-
+    all_data.reset_index(drop=True, inplace=True)
+    all_data.insert(0,'s.n', range(1, len(all_data) + 1))
     conn.close()
     return all_data

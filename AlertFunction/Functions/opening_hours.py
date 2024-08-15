@@ -74,42 +74,67 @@ def prediction_difference():
                 temp_df = pd.DataFrame(rows, columns=['date', 'total_gross', 'created_at', 'restaurant', 'percentage_difference'])
                 all_data= pd.concat([all_data,temp_df],ignore_index= True)
     conn.close()
+    all_data.reset_index(drop=True, inplace=True)
     return all_data
 
 def prediction_restaurant_count():
     with psycopg2.connect(**prod_params) as conn:
         with conn.cursor() as cursor:
             pred_execution = '''
-                WITH MaxDates_daily AS (
-                    SELECT restaurant, MAX(created_at) AS max_created_at_daily
-                    FROM public."Predictions_predictions"
-                    WHERE restaurant NOT IN ('Krunch Oslo', 'Krunch Stavanger')
-                    GROUP BY restaurant
-                ),
-                MaxDates_hourly AS (
-                    SELECT restaurant, MAX(created_at) AS max_created_at_hourly
-                    FROM public."Predictions_predictionsbyhour"
-                    WHERE restaurant NOT IN ('Krunch Oslo', 'Krunch Stavanger')
-                    GROUP BY restaurant
-                )
-                SELECT 
-                    COALESCE(d.restaurant, h.restaurant) AS restaurant,
-                    date(d.max_created_at_daily) as daily,
-                    date(h.max_created_at_hourly) as hourly
-                FROM 
-                    MaxDates_daily d
-                FULL OUTER JOIN 
-                    MaxDates_hourly h 
-                ON 
-                    d.restaurant = h.restaurant
-                ORDER BY 
-                    COALESCE(d.max_created_at_daily, h.max_created_at_hourly) DESC;
-
+                        WITH MaxDates_daily AS (
+                            SELECT restaurant, MAX(created_at) AS max_created_at_daily
+                            FROM public."Predictions_predictions"
+                            WHERE restaurant NOT IN ('Krunch Oslo', 'Krunch Stavanger')
+                            GROUP BY restaurant
+                        ),
+                        MaxDates_hourly AS (
+                            SELECT restaurant, MAX(created_at) AS max_created_at_hourly
+                            FROM public."Predictions_predictionsbyhour"
+                            WHERE restaurant NOT IN ('Krunch Oslo', 'Krunch Stavanger')
+                            GROUP BY restaurant
+                        ),
+                        MaxDates_supergroup AS (
+                            SELECT restaurant, MAX(created_at) AS max_created_at_supergroup
+                            FROM public."Predictions_supergroupprediction"
+                            WHERE restaurant NOT IN ('Krunch Oslo', 'Krunch Stavanger')
+                            GROUP BY restaurant
+                        ),
+                        MaxDates_group AS (
+                            SELECT restaurant, MAX(created_at) AS max_created_at_group
+                            FROM public."Predictions_productmixprediction"
+                            WHERE restaurant NOT IN ('Krunch Oslo', 'Krunch Stavanger')
+                            GROUP BY restaurant
+                        ),
+                        MaxDates_type AS (
+                            SELECT restaurant, MAX(created_at) AS max_created_at_type
+                            FROM public."Predictions_typeprediction"
+                            WHERE restaurant NOT IN ('Krunch Oslo', 'Krunch Stavanger')
+                            GROUP BY restaurant
+                        )
+                        SELECT 
+                            COALESCE(d.restaurant, h.restaurant, s.restaurant, g.restaurant, t.restaurant) AS restaurant,
+                            DATE(d.max_created_at_daily) AS daily,
+                            DATE(h.max_created_at_hourly) AS hourly,
+                            DATE(s.max_created_at_supergroup) AS supergroup,
+                            DATE(g.max_created_at_group) AS product_mix_group,
+                            DATE(t.max_created_at_type) AS type
+                        FROM 
+                            MaxDates_daily d
+                        FULL OUTER JOIN 
+                            MaxDates_hourly h ON d.restaurant = h.restaurant
+                        FULL OUTER JOIN 
+                            MaxDates_supergroup s ON COALESCE(d.restaurant, h.restaurant) = s.restaurant
+                        FULL OUTER JOIN 
+                            MaxDates_group g ON COALESCE(d.restaurant, h.restaurant, s.restaurant) = g.restaurant
+                        FULL OUTER JOIN 
+                            MaxDates_type t ON COALESCE(d.restaurant, h.restaurant, s.restaurant, g.restaurant) = t.restaurant
+                        ORDER BY 
+                            COALESCE(d.max_created_at_daily, h.max_created_at_hourly, s.max_created_at_supergroup, g.max_created_at_group, t.max_created_at_type) DESC;
             '''
             cursor.execute(pred_execution)
             rows = cursor.fetchall()
-            temp_df = pd.DataFrame(rows, columns=['restaurant','Daily Prediction','Hourly Prediction'])
+            temp_df = pd.DataFrame(rows, columns=['restaurant','Daily','Hourly','Supergroup','Group','Type'])
             temp_df.insert(0, 's.n', range(1, len(temp_df) + 1))
+            temp_df.reset_index(drop=True, inplace=True)
     conn.close()
     return temp_df
-
