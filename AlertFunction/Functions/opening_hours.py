@@ -80,20 +80,35 @@ def prediction_restaurant_count():
     with psycopg2.connect(**prod_params) as conn:
         with conn.cursor() as cursor:
             pred_execution = '''
-            WITH MaxDates AS (
-                SELECT restaurant, MAX(created_at) AS max_created_at
-                FROM public."Predictions_predictions"
-                where restaurant not in ('Krunch Oslo','Krunch Stavanger')
-                GROUP BY restaurant
-            )
-            SELECT DISTINCT pp.restaurant, date(pp.created_at) 
-            FROM public."Predictions_predictions" pp
-            JOIN MaxDates md ON pp.restaurant = md.restaurant AND pp.created_at = md.max_created_at
-            order by date desc
+                WITH MaxDates_daily AS (
+                    SELECT restaurant, MAX(created_at) AS max_created_at_daily
+                    FROM public."Predictions_predictions"
+                    WHERE restaurant NOT IN ('Krunch Oslo', 'Krunch Stavanger')
+                    GROUP BY restaurant
+                ),
+                MaxDates_hourly AS (
+                    SELECT restaurant, MAX(created_at) AS max_created_at_hourly
+                    FROM public."Predictions_predictionsbyhour"
+                    WHERE restaurant NOT IN ('Krunch Oslo', 'Krunch Stavanger')
+                    GROUP BY restaurant
+                )
+                SELECT 
+                    COALESCE(d.restaurant, h.restaurant) AS restaurant,
+                    date(d.max_created_at_daily) as daily,
+                    date(h.max_created_at_hourly) as hourly
+                FROM 
+                    MaxDates_daily d
+                FULL OUTER JOIN 
+                    MaxDates_hourly h 
+                ON 
+                    d.restaurant = h.restaurant
+                ORDER BY 
+                    COALESCE(d.max_created_at_daily, h.max_created_at_hourly) DESC;
+
             '''
             cursor.execute(pred_execution)
             rows = cursor.fetchall()
-            temp_df = pd.DataFrame(rows, columns=['restaurant','Prediction date'])
+            temp_df = pd.DataFrame(rows, columns=['restaurant','Daily Prediction','Hourly Prediction'])
             temp_df.insert(0, 's.n', range(1, len(temp_df) + 1))
     conn.close()
     return temp_df
