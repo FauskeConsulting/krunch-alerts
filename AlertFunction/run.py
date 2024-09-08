@@ -16,7 +16,7 @@ def main(myTimer: func.TimerRequest) -> None:
 
     logging.info("Python timer trigger function executed.")
     pred_rest_count = prediction_restaurant_count()
-    # differences_opening_hours = opening_hours_diff()
+    differences_opening_hours = opening_hours_diff()
     difference_predictions = prediction_difference()
     deviation = deviation_in_prediction()
     sales_pred = sales_vs_pred()
@@ -30,13 +30,16 @@ def main(myTimer: func.TimerRequest) -> None:
     # Convert DataFrames to HTML
     prediction_restaurant_count_html = pred_rest_count.to_html(index=False)
     deviation_html = deviation.to_html(index=False)
-    # differences_opening_hours_html = differences_opening_hours.to_html(index=False) if len(differences_opening_hours) >0 else "There are currently no changes in opening hours"
+    differences_opening_hours_html = differences_opening_hours.to_html(index=False) if len(differences_opening_hours) >0 else "There are currently no changes in opening hours"
     difference_predictions_html = difference_predictions.to_html(index=False) if len(difference_predictions) > 0 else "There are currently no unusual predictions that deviate more than 50% since the last prediction"
     sales_pred_html = sales_pred.to_html(index=False)
 
     # Create email content
     email_subject = "Restaurant Data Updates"
     email_body = f"""
+    <h3>Changes in Opening Hours</h3>
+    {differences_opening_hours_html}
+    <br><br>
     <h3>Prediction Status</h3>
     <p>The table shows when the prediction ran for which restaurant</p>
     {prediction_restaurant_count_html}

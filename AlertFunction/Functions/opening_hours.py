@@ -1,7 +1,7 @@
     
 import logging
 import psycopg2
-from AlertFunction.params import prod_params,local_params
+from AlertFunction.params import params
 from AlertFunction.constant import restaurants
 import pandas as pd
 
@@ -10,12 +10,12 @@ def opening_hours_diff():
     opening_hours_local = pd.DataFrame(columns=['start_hour', 'end_hour', 'start_date', 'end_date', 'restaurant', 'day_of_week'])
     opening_hours_prod = pd.DataFrame(columns=['start_hour', 'end_hour', 'start_date', 'end_date', 'restaurant', 'day_of_week'])
 
-    with psycopg2.connect(**local_params) as conn:
+    with psycopg2.connect(**params) as conn:
         with conn.cursor() as cursor:
             for restaurant in restaurants:
                 local_query_opening_hours = '''
                 SELECT oh.start_hour, oh.end_hour, oh.start_date, oh.end_date, ar.name, oh.day_of_week
-                FROM public.accounts_openinghours oh
+                FROM public.account_openinghours_unchanged oh
                 JOIN public.accounts_restaurant ar 
                 ON ar.id = oh.restaurant_id
                 WHERE ar.name = %s
@@ -27,13 +27,8 @@ def opening_hours_diff():
                 
                 # Concatenate to the main dataframe
                 opening_hours_local = pd.concat([opening_hours_local, temp_df], ignore_index=True)
-            # opening_hours_local.to_csv('opening_hours_local.csv')
-    conn.close()
-            
-            
 
-    with psycopg2.connect(**prod_params) as conn:
-        with conn.cursor() as cursor:
+            # opening_hours_local.to_csv('opening_hours_local.csv')
             for restaurant in restaurants:
                 local_query_opening_hours = '''
                 SELECT oh.start_hour, oh.end_hour, oh.start_date, oh.end_date, ar.name, oh.day_of_week
@@ -60,7 +55,7 @@ def opening_hours_diff():
     return df_diff
 
 def prediction_difference():
-    with psycopg2.connect(**prod_params) as conn:
+    with psycopg2.connect(**params) as conn:
         with conn.cursor() as cursor:
             all_data = pd.DataFrame()
             for restaurant in restaurants:
@@ -78,7 +73,7 @@ def prediction_difference():
     return all_data
 
 def prediction_restaurant_count():
-    with psycopg2.connect(**prod_params) as conn:
+    with psycopg2.connect(**params) as conn:
         with conn.cursor() as cursor:
             pred_execution = '''
                         WITH MaxDates_daily AS (

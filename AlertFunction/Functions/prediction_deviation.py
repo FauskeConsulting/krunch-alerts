@@ -1,10 +1,10 @@
 import psycopg2
 import pandas as pd
-from AlertFunction.params import prod_params
+from AlertFunction.params import params
 from AlertFunction.constant import restaurants
 
 def deviation_in_prediction():
-    with psycopg2.connect(**prod_params) as conn:
+    with psycopg2.connect(**params) as conn:
         with conn.cursor() as cursor:
             all_data = pd.DataFrame()
             for restaurant in restaurants:

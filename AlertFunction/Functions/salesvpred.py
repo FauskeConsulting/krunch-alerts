@@ -1,11 +1,11 @@
 import psycopg2
 import pandas as pd
-from AlertFunction.params import prod_params
+from AlertFunction.params import params
 from AlertFunction.constant import restaurants
 from datetime import timedelta
 
 def sales_vs_pred():
-    with psycopg2.connect(**prod_params) as conn:
+    with psycopg2.connect(**params) as conn:
         with conn.cursor() as cursor:
             end_date_query = '''
             SELECT MAX(gastronomic_day)
