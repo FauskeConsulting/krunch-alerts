@@ -5,7 +5,8 @@ restaurants = [
     "Oslo Steen_Strom", "Stavanger", 
     "Fredrikstad",
      "Sandnes",
-    "Fisketorget Utsalg","Restaurant", "Oslo Lokka", "Oslo Torggata",
+     "Oslo Storo",
+    "Oslo Lokka", "Oslo Torggata",
     "Oslo Smestad","Trondheim",
-    "Oslo Storo","Åsane Storsenter",'Bjørvika','Alexander Kielland'
+    'Bjørvika','Alexander Kielland'
 ]

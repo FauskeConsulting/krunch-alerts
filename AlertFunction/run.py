@@ -1,6 +1,7 @@
 import azure.functions as func
 import logging
 import pandas as pd
+from AlertFunction.Functions.monthly_average_difference import percentage_diff_per_month
 from AlertFunction.Functions.prediction_deviation import deviation_in_prediction
 from AlertFunction.Functions.salesvpred import sales_vs_pred
 from AlertFunction.Functions.opening_hours import opening_hours_diff,prediction_difference,prediction_restaurant_count
@@ -20,19 +21,24 @@ def main(myTimer: func.TimerRequest) -> None:
     difference_predictions = prediction_difference()
     deviation = deviation_in_prediction()
     sales_pred = sales_vs_pred()
-    # pred_rest_count.to_csv('preddate.csv')
-    # differences_opening_hours.to_csv('predopeninghrs.csv')
-    # difference_predictions.to_csv('preddiff.csv')
-    # deviation.to_csv('pred_deviation.csv')
-    # sales_pred.to_csv('predvSales.csv')
+    # sales_pred.to_excel('SalesvsPrediction.xlsx',index=False)
+    average_percentage_difference = percentage_diff_per_month()
+    # average_percentage_difference.to_excel('avg_diff.xlsx',index=False)
+    # # pred_rest_count.to_csv('preddate.csv')
+    # # differences_opening_hours.to_csv('predopeninghrs.csv')
+    # # difference_predictions.to_csv('preddiff.csv')
+    # # deviation.to_csv('pred_deviation.csv')
+    # # sales_pred.to_csv('predvSales.csv')
 
 
-    # Convert DataFrames to HTML
+    # # # Convert DataFrames to HTML
     prediction_restaurant_count_html = pred_rest_count.to_html(index=False)
     deviation_html = deviation.to_html(index=False)
     differences_opening_hours_html = differences_opening_hours.to_html(index=False) if len(differences_opening_hours) >0 else "There are currently no changes in opening hours"
     difference_predictions_html = difference_predictions.to_html(index=False) if len(difference_predictions) > 0 else "There are currently no unusual predictions that deviate more than 50% since the last prediction"
     sales_pred_html = sales_pred.to_html(index=False)
+    average_percentage_difference_html = average_percentage_difference.to_html(index=False)
+
 
     # Create email content
     email_subject = "Restaurant Data Updates"
@@ -43,6 +49,9 @@ def main(myTimer: func.TimerRequest) -> None:
     <h3>Prediction Status</h3>
     <p>The table shows when the prediction ran for which restaurant</p>
     {prediction_restaurant_count_html}
+    <br><br>
+    <h3>absolute average percentage difference per month</h3>
+    {average_percentage_difference_html}
     <br><br>
     <h3>Unusual Predictions</h3>
     {difference_predictions_html}
