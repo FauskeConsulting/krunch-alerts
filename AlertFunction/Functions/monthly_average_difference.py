@@ -2,7 +2,7 @@ import pandas as pd
 from AlertFunction.params import params
 from AlertFunction.constant import restaurants
 import psycopg2
-from datetime import date
+from datetime import date, timedelta
 
 
 query = '''
@@ -30,7 +30,7 @@ WITH SalesDataWithDifferences AS (
                 restaurant,
                 MAX(created_at) AS latest_created_at
             FROM public."Predictions_predictions"
-            WHERE date BETWEEN '2024-10-01' AND '2024-10-22'
+            WHERE date BETWEEN %s AND %s
             GROUP BY date, restaurant
         ) p2
         ON p1.date = p2.date
@@ -43,7 +43,7 @@ WITH SalesDataWithDifferences AS (
         s.total_sales,
         p.predicted_sales,
         CASE 
-            WHEN p.predicted_sales IS NOT NULL AND s.total_sales IS NOT NULL THEN
+            WHEN p.predicted_sales IS NOT NULL AND p.predicted_sales != 0 AND s.total_sales IS NOT NULL THEN
                 ABS((s.total_sales - p.predicted_sales) / p.predicted_sales) * 100
             ELSE NULL
         END AS percentage_difference
@@ -56,26 +56,24 @@ WITH SalesDataWithDifferences AS (
 -- Calculate average percentage difference
 SELECT 
     restaurant,
-	sum(total_sales) as sales,
-	sum(predicted_sales) as prediction,
+    SUM(total_sales) AS sales,
+    SUM(predicted_sales) AS prediction,
     AVG(percentage_difference) AS average_percentage_difference
 FROM SalesDataWithDifferences
 WHERE percentage_difference IS NOT NULL
 GROUP BY 1;
 '''
 
-
-
 def percentage_diff_per_month():
     with psycopg2.connect(**params) as conn:
         with conn.cursor() as cursor:
             all_data = pd.DataFrame()
             # Get today's date
-            today = date.today()
+            today = date.today()-timedelta(days=1)
             # Replace the day with 1
             first_of_month = today.replace(day=1)
             for restaurant in restaurants:
-                cursor.execute(query,[first_of_month,today,restaurant])
+                cursor.execute(query,[first_of_month,today,first_of_month,today,restaurant])
                 rows = cursor.fetchall()
                 temp_df = pd.DataFrame(rows, columns=['Restaurant', 'sales','prediction','Average of "%" difference per day'])
                 all_data= pd.concat([all_data,temp_df],ignore_index= True)
