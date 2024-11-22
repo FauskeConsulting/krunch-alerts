@@ -9,4 +9,5 @@ restaurants = [
     "Oslo Lokka", "Oslo Torggata",
     "Oslo Smestad","Trondheim",
     'Bjørvika','Alexander Kielland'
+    'Pedersgata Dine-In'
 ]

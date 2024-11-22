@@ -6,6 +6,7 @@ from AlertFunction.Functions.prediction_deviation import deviation_in_prediction
 from AlertFunction.Functions.salesvpred import sales_vs_pred
 from AlertFunction.Functions.opening_hours import opening_hours_diff,prediction_difference,prediction_restaurant_count
 from AlertFunction.Functions.send_email import send_email
+from AlertFunction.Functions.user_predictions import user_predictions
 from dotenv import load_dotenv
 import os
 
@@ -21,6 +22,8 @@ def main(myTimer: func.TimerRequest) -> None:
     difference_predictions = prediction_difference()
     deviation = deviation_in_prediction()
     sales_pred = sales_vs_pred()
+    user_predictions_df = user_predictions()
+    # user_predictions_df.to_csv('user_predictions.csv')
     # sales_pred.to_excel('SalesvsPrediction.xlsx',index=False)
     average_percentage_difference = percentage_diff_per_month()
     # average_percentage_difference.to_excel('avg_diff.xlsx',index=False)
@@ -38,11 +41,14 @@ def main(myTimer: func.TimerRequest) -> None:
     difference_predictions_html = difference_predictions.to_html(index=False) if len(difference_predictions) > 0 else "There are currently no unusual predictions that deviate more than 50% since the last prediction"
     sales_pred_html = sales_pred.to_html(index=False)
     average_percentage_difference_html = average_percentage_difference.to_html(index=False)
-
+    user_predictions_html = user_predictions_df.to_html(index=False) if len(user_predictions_df) >0 else "There are no additional user predictions"
 
     # Create email content
     email_subject = "Restaurant Data Updates"
     email_body = f"""
+    <h3>User Predictions</h3>
+    {user_predictions_html}
+    <br><br>
     <h3>Changes in Opening Hours</h3>
     {differences_opening_hours_html}
     <br><br>
